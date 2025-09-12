@@ -19,9 +19,9 @@ AccelStepper stepperY(DRIVER, Y_STEP, Y_DIR);
 AccelStepper stepperZ(DRIVER, Z_STEP, Z_DIR);
 
 // ====== USER PARAMETERS ======
-float speedX = 400.0;
-float speedY = 400.0;
-float speedZ = 400.0;
+float speedX = 0.0;
+float speedY = 0.0;
+float speedZ = 0.0;
 
 // Store last speeds for START command
 float lastSpeedX = speedX;
@@ -30,6 +30,12 @@ float lastSpeedZ = speedZ;
 
 String inputString = ""; 
 
+// ------------------- Preset speeds -------------------
+// You can edit these values to whatever speeds you want (steps per second)
+float presetX = 500;
+float presetY = -300;
+float presetZ = 200;
+
 void setup() {
   pinMode(ENABLE_PIN, OUTPUT);
   digitalWrite(ENABLE_PIN, LOW); // LOW = enable drivers
@@ -37,6 +43,9 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Enter speeds like: X500 Y-300 Z100");
   Serial.println("STOP stops motors, START resumes last speeds.");
+  Serial.println("  RUN              (run preset speeds)");
+  Serial.println("⚠️ Make sure Serial Monitor is set to 115200 baud.");
+  Serial.println("⚠️ Also set 'Newline' as the line ending in the dropdown menu.");
 
   // Set max speed + acceleration
   stepperX.setMaxSpeed(2000);
@@ -106,6 +115,52 @@ void parseCommand(String cmd) {
     return;
   }
 
+    // RUN (preset)
+  if (cmd.startsWith("RUN")) {
+    stepperX.setSpeed(presetX);
+    stepperY.setSpeed(presetY);
+    stepperZ.setSpeed(presetZ);
+
+    Serial.print("▶️ Running preset speeds: X=");
+    Serial.print(presetX);
+    Serial.print(" Y=");
+    Serial.print(presetY);
+    Serial.print(" Z=");
+    Serial.println(presetZ);
+
+    lastSpeedX = presetX;
+    lastSpeedY = presetY;
+    lastSpeedZ = presetZ;
+
+    return;
+  }
+
+    // SET (update preset values)
+  if (cmd.startsWith("SET")) {
+    int xIndex = cmd.indexOf('X');
+    if (xIndex != -1) {
+      presetX = cmd.substring(xIndex + 1).toFloat();
+      Serial.print("Preset X updated to: ");
+      Serial.println(presetX);
+    }
+
+    int yIndex = cmd.indexOf('Y');
+    if (yIndex != -1) {
+      presetY = cmd.substring(yIndex + 1).toFloat();
+      Serial.print("Preset Y updated to: ");
+      Serial.println(presetY);
+    }
+
+    int zIndex = cmd.indexOf('Z');
+    if (zIndex != -1) {
+      presetZ = cmd.substring(zIndex + 1).toFloat();
+      Serial.print("Preset Z updated to: ");
+      Serial.println(presetZ);
+    }
+
+    return;
+  }
+
   // X-axis
   int xIndex = cmd.indexOf('X');
   if (xIndex != -1) {
@@ -133,4 +188,3 @@ void parseCommand(String cmd) {
     Serial.println(speedZ);
   }
 }
-
