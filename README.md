@@ -12,3 +12,4 @@
 **Serial Monitor reminders:**
 - Baud rate: 115200
 - Line ending: Newline
+- Commands are case-insensitive
