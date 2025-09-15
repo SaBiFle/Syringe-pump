@@ -32,18 +32,19 @@ String inputString = "";
 
 // ------------------- Preset speeds -------------------
 // You can edit these values to whatever speeds you want (steps per second)
-float presetX = 500;
-float presetY = -300;
-float presetZ = 200;
+float presetX = 0.5;   // << can now be fractional
+float presetY = -0.25;
+float presetZ = 0.1;
 
 void setup() {
   pinMode(ENABLE_PIN, OUTPUT);
   digitalWrite(ENABLE_PIN, LOW); // LOW = enable drivers
 
   Serial.begin(115200);
-  Serial.println("Enter speeds like: X500 Y-300 Z100");
+  Serial.println("Enter speeds like: X0.25 Y-0.1 Z2.5   (fractions allowed!)");
   Serial.println("STOP stops motors, START resumes last speeds.");
   Serial.println("  RUN              (run preset speeds)");
+  Serial.println("  SET X## Y## Z##  (update preset values)");
   Serial.println("⚠️ Make sure Serial Monitor is set to 115200 baud.");
   Serial.println("⚠️ Also set 'Newline' as the line ending in the dropdown menu.");
 
@@ -115,7 +116,7 @@ void parseCommand(String cmd) {
     return;
   }
 
-    // RUN (preset)
+  // RUN (preset)
   if (cmd.startsWith("RUN")) {
     stepperX.setSpeed(presetX);
     stepperY.setSpeed(presetY);
@@ -135,27 +136,27 @@ void parseCommand(String cmd) {
     return;
   }
 
-    // SET (update preset values)
+  // SET (update preset values)
   if (cmd.startsWith("SET")) {
     int xIndex = cmd.indexOf('X');
     if (xIndex != -1) {
       presetX = cmd.substring(xIndex + 1).toFloat();
       Serial.print("Preset X updated to: ");
-      Serial.println(presetX);
+      Serial.println(presetX, 4);  // print with 4 decimals
     }
 
     int yIndex = cmd.indexOf('Y');
     if (yIndex != -1) {
       presetY = cmd.substring(yIndex + 1).toFloat();
       Serial.print("Preset Y updated to: ");
-      Serial.println(presetY);
+      Serial.println(presetY, 4);
     }
 
     int zIndex = cmd.indexOf('Z');
     if (zIndex != -1) {
       presetZ = cmd.substring(zIndex + 1).toFloat();
       Serial.print("Preset Z updated to: ");
-      Serial.println(presetZ);
+      Serial.println(presetZ, 4);
     }
 
     return;
@@ -167,7 +168,7 @@ void parseCommand(String cmd) {
     speedX = cmd.substring(xIndex + 1).toFloat();
     stepperX.setSpeed(speedX);   // negative values = reverse
     Serial.print("X speed set to: ");
-    Serial.println(speedX);
+    Serial.println(speedX, 4);
   }
 
   // Y-axis
@@ -176,7 +177,7 @@ void parseCommand(String cmd) {
     speedY = cmd.substring(yIndex + 1).toFloat();
     stepperY.setSpeed(speedY);
     Serial.print("Y speed set to: ");
-    Serial.println(speedY);
+    Serial.println(speedY, 4);
   }
 
   // Z-axis
@@ -185,6 +186,6 @@ void parseCommand(String cmd) {
     speedZ = cmd.substring(zIndex + 1).toFloat();
     stepperZ.setSpeed(speedZ);
     Serial.print("Z speed set to: ");
-    Serial.println(speedZ);
+    Serial.println(speedZ, 4);
   }
 }
